@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Lab Assistants - Healthcare System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+                <h3>Healthcare System</h3>
+            </div>
+            <nav class="sidebar-menu">
+                <ul>
+                    <li><a href="{{ url_for('admin.admin_dashboard') }}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+                    <li><a href="{{ url_for('admin.add_doctor') }}"><i class="fas fa-user-md"></i> <span>Add Doctor</span></a></li>
+                    <li><a href="{{ url_for('admin.add_patient') }}"><i class="fas fa-user-injured"></i> <span>Add Patient</span></a></li>
+                    <li><a href="{{ url_for('admin.add_lab_assistant') }}"><i class="fas fa-flask"></i> <span>Add Lab Assistant</span></a></li>
+                    <li><a href="{{ url_for('admin.view_doctors') }}"><i class="fas fa-stethoscope"></i> <span>View Doctors</span></a></li>
+                    <li><a href="{{ url_for('admin.view_patients') }}"><i class="fas fa-users"></i> <span>View Patients</span></a></li>
+                    <li class="active"><a href="{{ url_for('admin.view_lab_assistants') }}"><i class="fas fa-vials"></i> <span>View Lab Assistants</span></a></li>
+                    <li><a href="{{ url_for('auth.profile') }}"><i class="fas fa-user-cog"></i> <span>Profile Settings</span></a></li>
+                    <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <i class="fas fa-bars menu-toggle"></i>
+                    <h2><i class="fas fa-vials"></i> View Lab Assistants</h2>
+                </div>
+                <div class="header-right">
+                    <div class="user-profile">
+                        <img src="https://via.placeholder.com/40" alt="Profile" class="profile-pic">
+                        <span>{{ session.username | default('Admin') }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <section class="content">
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-container">
+                            {% for category, message in messages %}
+                                <div class="flash-message {{ category }}">{{ message }} <i class="fas fa-times flash-close"></i></div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Table Actions -->
+                <div class="table-actions">
+                    <form class="search-form" method="GET" action="{{ url_for('admin.view_lab_assistants') }}">
+                        <div class="search-group">
+                            <input type="text" name="search" placeholder="Search by name, ID, or department" value="{{ search | safe }}" aria-label="Search lab assistants">
+                            <button type="submit" class="search-btn" aria-label="Search"><i class="fas fa-search"></i></button>
+                        </div>
+                        <input type="hidden" name="sort_by" value="{{ sort_by }}">
+                        <input type="hidden" name="sort_order" value="{{ sort_order }}">
+                    </form>
+                    <div class="action-buttons">
+                        <a href="{{ url_for('admin.add_lab_assistant') }}" class="action-btn"><i class="fas fa-user-plus"></i> Add Lab Assistant</a>
+                        <a href="{{ url_for('admin.export_lab_assistants') }}" class="action-btn"><i class="fas fa-download"></i> Export</a>
+                    </div>
+                </div>
+
+                <!-- Lab Assistants Table -->
+                <div class="table-card">
+                    <div class="card-header">
+                        <h3>Lab Assistants List</h3>
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <a href="{{ url_for('admin.view_lab_assistants', search=search, sort_by='name', sort_order='desc' if sort_by == 'name' and sort_order == 'asc' else 'asc') }}">
+                                            Name
+                                            {% if sort_by == 'name' %}
+                                                <i class="fas fa-sort-{{ 'down' if sort_order == 'desc' else 'up' }}"></i>
+                                            {% endif %}
+                                        </a>
+                                    </th>
+                                    <th>Lab Assistant ID</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>
+                                        <a href="{{ url_for('admin.view_lab_assistants', search=search, sort_by='lab_department', sort_order='desc' if sort_by == 'lab_department' and sort_order == 'asc' else 'asc') }}">
+                                            Department
+                                            {% if sort_by == 'lab_department' %}
+                                                <i class="fas fa-sort-{{ 'down' if sort_order == 'desc' else 'up' }}"></i>
+                                            {% endif %}
+                                        </a>
+                                    </th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if lab_assistants %}
+                                    {% for la in lab_assistants %}
+                                        <tr>
+                                            <td>{{ la.name }}</td>
+                                            <td>{{ la.lab_assistant_id }}</td>
+                                            <td>{{ la.email }}</td>
+                                            <td>{{ la.phone }}</td>
+                                            <td>{{ la.lab_department }}</td>
+                                            <td class="action-cell">
+                                                <a href="{{ url_for('admin.edit_lab_assistant', lab_assistant_id=la.lab_assistant_id) }}" class="table-btn edit-btn" title="Edit" aria-label="Edit lab assistant"><i class="fas fa-edit"></i></a>
+                                                <form action="{{ url_for('admin.delete_lab_assistant', lab_assistant_id=la.lab_assistant_id) }}" method="POST" class="delete-form">
+                                                    <button type="submit" class="table-btn delete-btn" title="Delete" aria-label="Delete lab assistant" onclick="return confirm('Are you sure you want to delete {{ la.name }} ({{ la.lab_assistant_id }})?');">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6">No lab assistants found.</td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                {% if total_pages > 1 %}
+                    <nav class="pagination" aria-label="Pagination">
+                        <div class="pagination-group">
+                            {% if page > 1 %}
+                                <a href="{{ url_for('admin.view_lab_assistants', search=search, sort_by=sort_by, sort_order=sort_order, page=page-1) }}" class="pagination-btn" aria-label="Previous page"><i class="fas fa-chevron-left"></i> Previous</a>
+                            {% endif %}
+                            <span>Page {{ page }} of {{ total_pages }}</span>
+                            {% if page < total_pages %}
+                                <a href="{{ url_for('admin.view_lab_assistants', search=search, sort_by=sort_by, sort_order=sort_order, page=page+1) }}" class="pagination-btn" aria-label="Next page">Next <i class="fas fa-chevron-right"></i></a>
+                            {% endif %}
+                        </div>
+                    </nav>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

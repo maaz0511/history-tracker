@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Patient - Healthcare System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+                <h3>Healthcare System</h3>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="{{ url_for('admin.admin_dashboard') }}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+                <li><a href="{{ url_for('admin.add_doctor') }}"><i class="fas fa-user-md"></i> <span>Add Doctor</span></a></li>
+                <li class="active"><a href="{{ url_for('admin.add_patient') }}"><i class="fas fa-user-injured"></i> <span>Add Patient</span></a></li>
+                <li><a href="{{ url_for('admin.add_lab_assistant') }}"><i class="fas fa-flask"></i> <span>Add Lab Assistant</span></a></li>
+                <li><a href="{{ url_for('admin.view_doctors') }}"><i class="fas fa-stethoscope"></i> <span>View Doctors</span></a></li>
+                <li><a href="{{ url_for('admin.view_patients') }}"><i class="fas fa-users"></i> <span>View Patients</span></a></li>
+                <li><a href="{{ url_for('admin.view_lab_assistants') }}"><i class="fas fa-vials"></i> <span>View Lab Assistants</span></a></li>
+                <li><a href="{{ url_for('auth.profile') }}"><i class="fas fa-user-cog"></i> <span>Profile Settings</span></a></li>
+                <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <i class="fas fa-bars menu-toggle"></i>
+                    <h2><i class="fas fa-user-injured"></i> Add New Patient</h2>
+                </div>
+                <div class="header-right">
+                    <div class="user-profile">
+                        <img src="https://via.placeholder.com/40" alt="Profile" class="profile-pic">
+                        <span>{{ session.username | default('Admin') }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Form Content -->
+            <div class="form-content">
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-container">
+                            {% for category, message in messages %}
+                                <div class="flash-message {{ category }}">{{ message }} <i class="fas fa-times flash-close"></i></div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Patient Form -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <h3>Patient Registration</h3>
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <form method="POST" action="{{ url_for('admin.add_patient') }}" class="patient-form" id="patientForm">
+                        <div class="form-section">
+                            <h4>Account Details</h4>
+                            <div class="form-group">
+                                <label for="password"><i class="fas fa-lock"></i> Password <span class="required">*</span></label>
+                                <input type="password" id="password" name="password" required aria-required="true" pattern=".{6,}" title="Password must be at least 6 characters long">
+                                <span class="error-message" id="password-error"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h4>Personal Information</h4>
+                            <div class="form-group">
+                                <label for="name"><i class="fas fa-id-badge"></i> Full Name <span class="required">*</span></label>
+                                <input type="text" id="name" name="name" required aria-required="true" pattern="[A-Za-z\s]{3,}" title="Name must be at least 3 characters long">
+                                <span class="error-message" id="name-error"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="date_of_birth"><i class="fas fa-calendar"></i> Date of Birth <span class="required">*</span></label>
+                                <input type="date" id="date_of_birth" name="date_of_birth" required aria-required="true" max="{{ today }}">
+                            </div>
+                            <div class="form-group">
+                                <label for="gender"><i class="fas fa-venus-mars"></i> Gender <span class="required">*</span></label>
+                                <select id="gender" name="gender" required aria-required="true">
+                                    <option value="" disabled selected>Select gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="address"><i class="fas fa-home"></i> Address</label>
+                                <textarea id="address" name="address" aria-describedby="address-desc"></textarea>
+                                <small id="address-desc" class="form-text">Optional: Provide full address for records.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact"><i class="fas fa-phone"></i> Contact Number <span class="required">*</span></label>
+                                <input type="tel" id="contact" name="contact" required aria-required="true" pattern="[0-9]{10}" title="Enter a valid 10-digit phone number">
+                                <span class="error-message" id="contact-error"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="emergency_contact"><i class="fas fa-phone-alt"></i> Emergency Contact</label>
+                                <input type="tel" id="emergency_contact" name="emergency_contact" pattern="[0-9]{10}" title="Enter a valid 10-digit phone number">
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h4>Medical Information</h4>
+                            <div class="form-group">
+                                <label for="blood_group"><i class="fas fa-tint"></i> Blood Group</label>
+                                <select id="blood_group" name="blood_group">
+                                    <option value="" selected>Select blood group</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="allergies"><i class="fas fa-exclamation-triangle"></i> Allergies</label>
+                                <textarea id="allergies" name="allergies" aria-describedby="allergies-desc"></textarea>
+                                <small id="allergies-desc" class="form-text">Optional: List any known allergies.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="medical_history"><i class="fas fa-notes-medical"></i> Medical History</label>
+                                <textarea id="medical_history" name="medical_history" aria-describedby="medical-history-desc"></textarea>
+                                <small id="medical-history-desc" class="form-text">Optional: Provide relevant medical history.</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="preferred_doctor"><i class="fas fa-user-md"></i> Preferred Doctor</label>
+                                <select id="preferred_doctor" name="preferred_doctor">
+                                    <option value="" selected>Select a doctor</option>
+                                    {% for doctor in doctors %}
+                                        <option value="{{ doctor[0] }}">{{ doctor[1] }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h4>Insurance Details</h4>
+                            <div class="form-group">
+                                <label for="insurance_details"><i class="fas fa-shield-alt"></i> Insurance Information</label>
+                                <textarea id="insurance_details" name="insurance_details" aria-describedby="insurance-desc"></textarea>
+                                <small id="insurance-desc" class="form-text">Optional: Provide insurance details.</small>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="action-btn"><i class="fas fa-save"></i> Add Patient</button>
+                            <a href="{{ url_for('admin.admin_dashboard') }}" class="action-btn secondary"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Client-side form validation
+        document.getElementById('patientForm').addEventListener('submit', function(event) {
+            let isValid = true;
+            const name = document.getElementById('name');
+            const password = document.getElementById('password');
+            const contact = document.getElementById('contact');
+
+            // Name validation
+            if (!name.value.match(/^[A-Za-z\s]{3,}$/)) {
+                document.getElementById('name-error').textContent = 'Name must be at least 3 characters long and contain only letters and spaces.';
+                isValid = false;
+            } else {
+                document.getElementById('name-error').textContent = '';
+            }
+
+            // Password validation
+            if (password.value.length < 6) {
+                document.getElementById('password-error').textContent = 'Password must be at least 6 characters long.';
+                isValid = false;
+            } else {
+                document.getElementById('password-error').textContent = '';
+            }
+
+            // Contact validation
+            if (!contact.value.match(/^[0-9]{10}$/)) {
+                document.getElementById('contact-error').textContent = 'Enter a valid 10-digit phone number.';
+                isValid = false;
+            } else {
+                document.getElementById('contact-error').textContent = '';
+            }
+
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

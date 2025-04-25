@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Doctor - Healthcare System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+                <h3>Healthcare System</h3>
+            </div>
+            <nav class="sidebar-menu">
+                <ul>
+                    <li><a href="{{ url_for('admin.admin_dashboard') }}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+                    <li><a href="{{ url_for('admin.add_doctor') }}"><i class="fas fa-user-md"></i> <span>Add Doctor</span></a></li>
+                    <li><a href="{{ url_for('admin.add_patient') }}"><i class="fas fa-user-injured"></i> <span>Add Patient</span></a></li>
+                    <li><a href="{{ url_for('admin.add_lab_assistant') }}"><i class="fas fa-flask"></i> <span>Add Lab Assistant</span></a></li>
+                    <li class="active"><a href="{{ url_for('admin.view_doctors') }}"><i class="fas fa-stethoscope"></i> <span>View Doctors</span></a></li>
+                    <li><a href="{{ url_for('admin.view_patients') }}"><i class="fas fa-users"></i> <span>View Patients</span></a></li>
+                    <li><a href="{{ url_for('admin.view_lab_assistants') }}"><i class="fas fa-vials"></i> <span>View Lab Assistants</span></a></li>
+                    <li><a href="{{ url_for('auth.profile') }}"><i class="fas fa-user-cog"></i> <span>Profile Settings</span></a></li>
+                    <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <i class="fas fa-bars menu-toggle"></i>
+                    <h2><i class="fas fa-user-edit"></i> Edit Doctor</h2>
+                </div>
+                <div class="header-right">
+                    <div class="user-profile">
+                        <img src="https://via.placeholder.com/40" alt="Profile" class="profile-pic">
+                        <span>{{ session.username | default('Admin') }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Form Content -->
+            <section class="form-content">
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-container">
+                            {% for category, message in messages %}
+                                <div class="flash-message {{ category }}">{{ message }} <i class="fas fa-times flash-close"></i></div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Doctor Form -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <h3>Edit Doctor: {{ doctor.name }} ({{ doctor.doctor_id }})</h3>
+                        <i class="fas fa-user-edit"></i>
+                    </div>
+                    <form method="POST" action="{{ url_for('admin.edit_doctor', doctor_id=doctor.doctor_id) }}" class="doctor-form">
+                        <div class="form-section">
+                            <h4>Personal Information</h4>
+                            <div class="form-group">
+                                <label for="name"><i class="fas fa-id-badge"></i> Full Name</label>
+                                <input type="text" id="name" name="name" value="{{ doctor.name }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email"><i class="fas fa-envelope"></i> Email ID</label>
+                                <input type="email" id="email" name="email" value="{{ doctor.email }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone"><i class="fas fa-phone"></i> Phone Number</label>
+                                <input type="tel" id="phone" name="phone" value="{{ doctor.phone }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="date_of_birth"><i class="fas fa-calendar"></i> Date of Birth</label>
+                                <input type="date" id="date_of_birth" name="date_of_birth" value="{{ doctor.date_of_birth }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="gender"><i class="fas fa-venus-mars"></i> Gender</label>
+                                <select id="gender" name="gender" required>
+                                    <option value="Male" {% if doctor.gender == 'Male' %}selected{% endif %}>Male</option>
+                                    <option value="Female" {% if doctor.gender == 'Female' %}selected{% endif %}>Female</option>
+                                    <option value="Other" {% if doctor.gender == 'Other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="blood_group"><i class="fas fa-tint"></i> Blood Group</label>
+                                <select id="blood_group" name="blood_group">
+                                    <option value="" {% if not doctor.blood_group %}selected{% endif %}>Select blood group</option>
+                                    <option value="A+" {% if doctor.blood_group == 'A+' %}selected{% endif %}>A+</option>
+                                    <option value="A-" {% if doctor.blood_group == 'A-' %}selected{% endif %}>A-</option>
+                                    <option value="B+" {% if doctor.blood_group == 'B+' %}selected{% endif %}>B+</option>
+                                    <option value="B-" {% if doctor.blood_group == 'B-' %}selected{% endif %}>B-</option>
+                                    <option value="AB+" {% if doctor.blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+                                    <option value="AB-" {% if doctor.blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+                                    <option value="O+" {% if doctor.blood_group == 'O+' %}selected{% endif %}>O+</option>
+                                    <option value="O-" {% if doctor.blood_group == 'O-' %}selected{% endif %}>O-</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="address"><i class="fas fa-home"></i> Address</label>
+                                <textarea id="address" name="address">{{ doctor.address if doctor.address else '' }}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="emergency_contact"><i class="fas fa-phone-alt"></i> Emergency Contact</label>
+                                <input type="tel" id="emergency_contact" name="emergency_contact" value="{{ doctor.emergency_contact if doctor.emergency_contact else '' }}">
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h4>Professional Information</h4>
+                            <div class="form-group">
+                                <label for="specialization"><i class="fas fa-stethoscope"></i> Specialization</label>
+                                <input type="text" id="specialization" name="specialization" value="{{ doctor.specialization }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="medical_registration_number"><i class="fas fa-id-card"></i> Medical Registration Number</label>
+                                <input type="text" id="medical_registration_number" name="medical_registration_number" value="{{ doctor.medical_registration_number }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="department"><i class="fas fa-building"></i> Department</label>
+                                <select id="department" name="department" required>
+                                    <option value="Cardiology" {% if doctor.department == 'Cardiology' %}selected{% endif %}>Cardiology</option>
+                                    <option value="Neurology" {% if doctor.department == 'Neurology' %}selected{% endif %}>Neurology</option>
+                                    <option value="Orthopedics" {% if doctor.department == 'Orthopedics' %}selected{% endif %}>Orthopedics</option>
+                                    <option value="Pediatrics" {% if doctor.department == 'Pediatrics' %}selected{% endif %}>Pediatrics</option>
+                                    <option value="General Medicine" {% if doctor.department == 'General Medicine' %}selected{% endif %}>General Medicine</option>
+                                    <option value="Surgery" {% if doctor.department == 'Surgery' %}selected{% endif %}>Surgery</option>
+                                    <option value="Other" {% if doctor.department == 'Other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="action-btn"><i class="fas fa-save"></i> Save Changes</button>
+                            <a href="{{ url_for('admin.view_doctors') }}" class="action-btn secondary"><i class="fas fa-arrow-left"></i> Back to Doctors</a>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        // Dismiss flash messages
+        document.querySelectorAll('.flash-close').forEach(button => {
+            button.addEventListener('click', () => {
+                button.parentElement.remove();
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Patient Health Care - A trusted platform for seamless healthcare management. Connect with doctors, manage records, and access care anytime, anywhere." />
+  <meta name="keywords" content="healthcare, patient management, doctor services, admin tools, medical platform" />
+  <meta name="author" content="Patient Health Care Team" />
+  <title>Patient Health Care</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="https://via.placeholder.com/32/0000FF/FFFFFF?text=PHC" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index_style.css') }}" />
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="sticky top-0 z-50 glass">
+    <div class="container">
+      <div class="flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+          <img src="https://via.placeholder.com/40/0000FF/FFFFFF?text=PHC" alt="Logo" class="logo" />
+          <h1>Patient Health Care</h1>
+        </div>
+        <div class="relative dropdown">
+          <button class="login-button">
+            Login
+          </button>
+          <div class="dropdown-menu">
+            <a href="{{ url_for('auth.login', role='patient') }}">Patient</a>
+            <a href="{{ url_for('auth.login', role='admin') }}">Admin</a>
+            <a href="{{ url_for('auth.login', role='doctor') }}">Doctor</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero-bg">
+    <div class="container text-center">
+      <h2>Your Trusted Healthcare Partner</h2>
+      <p>Seamlessly connect with top doctors, manage your health records, and access personalized care anytime, anywhere with Patient Health Care.</p>
+      <a href="{{ url_for('auth.login') }}" class="cta-button">
+        Get Started Now
+      </a>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <div class="container">
+      <div class="text-center">
+        <h3>Explore Our Features</h3>
+        <p>Discover how Patient Health Care empowers patients, doctors, and administrators with cutting-edge tools for efficient healthcare management.</p>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <div class="icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
+            </svg>
+          </div>
+          <h4>Patient Portal</h4>
+          <p>Effortlessly book appointments, access your medical history, and manage digital prescriptions in one secure platform.</p>
+        </div>
+        <div class="card">
+          <div class="icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h4>Doctor Dashboard</h4>
+          <p>Streamline patient care with tools to manage schedules, issue prescriptions, and collaborate with healthcare teams.</p>
+        </div>
+        <div class="card">
+          <div class="icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+            </svg>
+          </div>
+          <h4>Admin Tools</h4>
+          <p>Oversee operations, manage user roles, and ensure compliance with secure, centralized administrative tools.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="testimonials">
+    <div class="container">
+      <div class="text-center">
+        <h3>What Our Users Say</h3>
+        <p>Hear from patients, doctors, and administrators who trust Patient Health Care for their healthcare needs.</p>
+      </div>
+      <div class="grid">
+        <div class="testimonial-card">
+          <p>"This platform has made managing my appointments and prescriptions so easy. I feel more in control of my health!"</p>
+          <p class="author">– Sarah M., Patient</p>
+        </div>
+        <div class="testimonial-card">
+          <p>"As a doctor, I can focus on my patients without worrying about paperwork. The dashboard is a game-changer."</p>
+          <p class="author">– Dr. John K., Physician</p>
+        </div>
+        <div class="testimonial-card">
+          <p>"Managing our clinic’s operations has never been easier. The admin tools are intuitive and secure."</p>
+          <p class="author">– Emily R., Administrator</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="container text-center">
+      <h3>Transform Your Healthcare Experience</h3>
+      <p>Join thousands of users who rely on Patient Health Care for accessible, efficient, and secure medical support.</p>
+      <a href="{{ url_for('auth.login') }}" class="cta-button">Sign Up Today</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container grid">
+      <div>
+        <h4>Patient Health Care</h4>
+        <p>Empowering healthcare with technology. Connect, manage, and thrive with our platform.</p>
+      </div>
+      <div>
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Contact Us</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <p>Email: support@patienthealthcare.com</p>
+        <p>Phone: +1 (800) 123-4567</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 Patient Health Care. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Toggle dropdown on click
+    const dropdown = document.querySelector('.dropdown');
+    const dropdownMenu = document.querySelector('.dropdown-menu');
+    const loginButton = document.querySelector('.login-button');
+
+    loginButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      dropdownMenu.classList.toggle('show');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!dropdown.contains(e.target)) {
+        dropdownMenu.classList.remove('show');
+      }
+    });
+
+    // Ensure dropdown links are clickable
+    dropdownMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        window.location.href = link.href;
+      });
+    });
+  </script>
+</body>
+</html>

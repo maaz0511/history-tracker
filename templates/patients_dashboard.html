@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/patient_dashboard.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Chatbot Section Styles */
+        .chatbot-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            position: relative;
+            background-image: linear-gradient(45deg, rgba(40, 167, 69, 0.05) 25%, transparent 25%, transparent 50%, rgba(40, 167, 69, 0.05) 50%, rgba(40, 167, 69, 0.05) 75%, transparent 75%, transparent);
+            background-size: 20px 20px;
+        }
+        .chatbot-header {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #319795, #319795);
+            color: #ffffff;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+        .chatbot-header i {
+            font-size: 1.5rem;
+            margin-right: 10px;
+        }
+        .chatbot-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .chatbot-header p {
+            margin: 5px 0 0;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        .chatbot-menu {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .chatbot-menu button {
+            display: flex;
+            align-items: center;
+            padding: 10px 18px;
+            background: #319795;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+        .chatbot-menu button i {
+            margin-right: 8px;
+            font-size: 1rem;
+        }
+        .chatbot-menu button:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        .chatbot-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #ffffff;
+            max-height: 450px;
+            scroll-behavior: smooth;
+        }
+        .chatbot-message {
+            margin-bottom: 15px;
+            opacity: 0;
+            animation: fadeIn 0.5s ease forwards;
+        }
+        .chatbot-message.user {
+            text-align: right;
+        }
+        .chatbot-message.bot {
+            text-align: left;
+        }
+        .chatbot-message p {
+            display: inline-block;
+            padding: 12px 18px;
+            border-radius: 12px;
+            margin: 5px 10px;
+            max-width: 70%;
+            line-height: 1.4;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .chatbot-message.user p {
+            background: #17a2b8;
+            color: #ffffff;
+        }
+        .chatbot-message.bot p {
+            background: #e9ecef;
+            color: #333333;
+        }
+        .chatbot-input {
+            display: flex;
+            gap: 10px;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+        }
+        .chatbot-input input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #cccccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+        .chatbot-input input:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 5px rgba(40, 167, 69, 0.3);
+        }
+        .chatbot-input button {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            background: #28a745;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+        .chatbot-input button i {
+            margin-right: 8px;
+        }
+        .chatbot-input button:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 600px) {
+            .chatbot-container {
+                max-width: 100%;
+                border-radius: 0;
+            }
+            .chatbot-menu button {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+            .chatbot-messages {
+                max-height: 300px;
+            }
+            .chatbot-message p {
+                max-width: 85%;
+            }
+            .chatbot-header h3 {
+                font-size: 1.2rem;
+            }
+            .chatbot-header i {
+                font-size: 1.2rem;
+            }
+        }
+        /* Dashboard Grid Styles to Match Doctor Dashboard */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+        .stat-card {
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-card h3 {
+            margin: 0 0 10px;
+            font-size: 1.2rem;
+            color: #333333;
+            font-weight: 500;
+        }
+        .stat-card p {
+            margin: 0;
+            font-size: 1rem;
+            color: #555555;
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3>MediCare Clinic</h3>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="#dashboard" class="sidebar-link active" onclick="showSection('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="#prescriptions" class="sidebar-link" onclick="showSection('prescriptions')">
+                    <i class="fas fa-prescription-bottle-alt"></i> Prescriptions
+                </a>
+                <a href="#lab-reports" class="sidebar-link" onclick="showSection('lab-reports')">
+                    <i class="fas fa-flask"></i> Lab Reports
+                </a>
+                <a href="#profile" class="sidebar-link" onclick="showSection('profile')">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+                <a href="#chatbot" class="sidebar-link" onclick="showSection('chatbot')">
+                    <i class="fas fa-robot"></i> Chatbot
+                </a>
+                <a href="/logout" class="sidebar-link">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section">
+                <h1>Dashboard</h1>
+                <div class="stats-grid">
+                    <!-- Patient Profile Cards -->
+                    <div class="stat-card">
+                        <h3>Name</h3>
+                        <p>{{ user_data.name }}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Patient ID</h3>
+                        <p>{{ user_data.patient_id }}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Date of Birth</h3>
+                        <p>{{ user_data.date_of_birth }}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Gender</h3>
+                        <p>{{ user_data.gender }}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Contact</h3>
+                        <p>{{ user_data.contact }}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Blood Group</h3>
+                        <p>{{ user_data.blood_group }}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Emergency Contact</h3>
+                        <p>{{ user_data.emergency_contact }}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Preferred Doctor</h3>
+                        <p>{{ user_data.preferred_doctor }}</p>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <!-- Prescriptions Section -->
+            <div id="prescriptions" class="section hidden">
+                <h1>My Prescriptions</h1>
+                <div class="content-card">
+                    <div class="search-container">
+                        <input type="text" id="prescription-search" placeholder="Search by Prescription ID or Doctor Name..." onkeyup="searchTable('prescription-search', 'prescription-table')">
+                    </div>
+                    {% if prescriptions %}
+                        <table id="prescription-table">
+                            <thead>
+                                <tr>
+                                    <th>Prescription ID</th>
+                                    <th>Doctor Name</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for prescription in prescriptions %}
+                                    <tr>
+                                        <td>{{ prescription.prescription_id }}</td>
+                                        <td>{{ prescription.doctor_name }}</td>
+                                        <td>{{ prescription.prescription_date }}</td>
+                                        <td>
+                                            <a href="/patient/download_prescription/{{ prescription.prescription_id }}?view=true" target="_blank">View</a>
+                                            <a href="/patient/download_prescription/{{ prescription.prescription_id }}">Download</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>No prescriptions available.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Lab Reports Section -->
+            <div id="lab-reports" class="section hidden">
+                <h1>My Lab Reports</h1>
+                <div class="content-card">
+                    <div class="search-container">
+                        <input type="text" id="lab-report-search" placeholder="Search by Report ID or Lab Assistant Name..." onkeyup="searchTable('lab-report-search', 'lab-report-table')">
+                    </div>
+                    {% if lab_reports %}
+                        <table id="lab-report-table">
+                            <thead>
+                                <tr>
+                                    <th>Report ID</th>
+                                    <th>Lab Assistant</th>
+                                    <th>Date</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in lab_reports %}
+                                    <tr>
+                                        <td>{{ report.id }}</td>
+                                        <td>{{ report.lab_assistant_name }}</td>
+                                        <td>{{ report.report_date }}</td>
+                                        <td>
+                                            <a href="/patient/download_lab_report/{{ report.id }}?view=true" target="_blank">View</a>
+                                            <a href="/patient/download_lab_report/{{ report.id }}">Download</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>No lab reports available.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div id="profile" class="section hidden">
+                <h1>My Profile</h1>
+                <div class="content-card">
+                    <h2>Patient Details</h2>
+                    {% if user_data %}
+                        <form action="/profile" method="POST">
+                            <input type="hidden" name="update_profile" value="true">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Patient ID</label>
+                                    <input type="text" name="patient_id" value="{{ user_data.patient_id }}" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Name</label>
+                                    <input type="text" name="name" value="{{ user_data.name }}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Date of Birth</label>
+                                    <input type="date" name="date_of_birth" value="{{ user_data.date_of_birth }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Gender</label>
+                                    <select name="gender">
+                                        <option value="Male" {% if user_data.gender == 'Male' %}selected{% endif %}>Male</option>
+                                        <option value="Female" {% if user_data.gender == 'Female' %}selected{% endif %}>Female</option>
+                                        <option value="Other" {% if user_data.gender == 'Other' %}selected{% endif %}>Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Address</label>
+                                    <input type="text" name="address" value="{{ user_data.address }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Contact</label>
+                                    <input type="text" name="contact" value="{{ user_data.contact }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Emergency Contact</label>
+                                    <input type="text" name="emergency_contact" value="{{ user_data.emergency_contact }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Insurance Details</label>
+                                    <input type="text" name="insurance_details" value="{{ user_data.insurance_details }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Blood Group</label>
+                                    <input type="text" name="blood_group" value="{{ user_data.blood_group }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Allergies</label>
+                                    <input type="text" name="allergies" value="{{ user_data.allergies }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>Medical History</label>
+                                    <textarea name="medical_history">{{ user_data.medical_history }}</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Preferred Doctor</label>
+                                    <input type="text" name="preferred_doctor" value="{{ user_data.preferred_doctor }}">
+                                </div>
+                            </div>
+                            <button type="submit">Update Profile</button>
+                        </form>
+
+                        <h2>Change Password</h2>
+                        <form action="/profile" method="POST">
+                            <input type="hidden" name="change_password" value="true">
+                            <div class="form-group">
+                                <label>Current Password</label>
+                                <input type="password" name="current_password" required>
+                            </div>
+                            <div class="form-group">
+                                <label>New Password</label>
+                                <input type="password" name="new_password" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Confirm New Password</label>
+                                <input type="password" name="confirm_password" required>
+                            </div>
+                            <button type="submit">Change Password</button>
+                        </form>
+
+                        <h2>Activity Logs</h2>
+                        {% if activity_logs %}
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Action</th>
+                                        <th>Timestamp</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for log in activity_logs %}
+                                        <tr>
+                                            <td>{{ log.action }}</td>
+                                            <td>{{ log.timestamp }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <p>No activity logs available.</p>
+                        {% endif %}
+                    {% else %}
+                        <p>Unable to load profile data.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Chatbot Section -->
+            <div id="chatbot" class="section hidden">
+                <h1>Chat with MediCare Bot</h1>
+                <div class="content-card">
+                    <div class="chatbot-container">
+                        <div class="chatbot-header">
+                            <i class="fas fa-plus-square"></i>
+                            <div>
+                                <h3>MediCare Assistant</h3>
+                                <p>Ask about your prescriptions, lab reports, medical history, allergies, or preferred doctor. Use the buttons or type your query below (e.g., "Show my emergency contact" for more details).</p>
+                            </div>
+                        </div>
+                        <div class="chatbot-menu">
+                            <button onclick="handleMenuOption('lab_report')"><i class="fas fa-flask"></i> View Lab Report</button>
+                            <button onclick="handleMenuOption('prescription')"><i class="fas fa-prescription-bottle-alt"></i> View Prescription</button>
+                            <button onclick="handleMenuOption('profile')"><i class="fas fa-user"></i> View Profile</button>
+                            <button onclick="handleMenuOption('medical_history')"><i class="fas fa-notes-medical"></i> Medical History</button>
+                            <button onclick="handleMenuOption('allergies')"><i class="fas fa-allergies"></i> Allergies</button>
+                            <button onclick="handleMenuOption('medicine_name')"><i class="fas fa-pills"></i> Medicine Name</button>
+                            <button onclick="handleMenuOption('total_prescriptions')"><i class="fas fa-file-prescription"></i> Total Prescriptions</button>
+                            <button onclick="handleMenuOption('total_lab_reports')"><i class="fas fa-vial"></i> Total Lab Reports</button>
+                            <button onclick="handleMenuOption('preferred_doctor')"><i class="fas fa-user-md"></i> Preferred Doctor</button>
+                            <button onclick="handleMenuOption('lab_assistant_name')"><i class="fas fa-user-nurse"></i> Lab Assistant</button>
+                            <button onclick="handleMenuOption('blood_group')"><i class="fas fa-tint"></i> Blood Group</button>
+                            <button onclick="handleMenuOption('help')"><i class="fas fa-question-circle"></i> Help</button>
+                        </div>
+                        <div class="chatbot-messages" id="chatbot-messages">
+                            <div class="chatbot-message bot">
+                                <p>Welcome! How can I assist you today? Use the buttons above or type your query below.</p>
+                            </div>
+                        </div>
+                        <div class="chatbot-input">
+                            <input type="text" id="chatbot-input" placeholder="Type your query (e.g., Show my lab report)" onkeydown="if(event.key === 'Enter') sendMessage()">
+                            <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i> Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.querySelectorAll('.sidebar-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            document.querySelector(`a[href="#${sectionId}"]`).classList.add('active');
+        }
+
+        function searchTable(inputId, tableId) {
+            const input = document.getElementById(inputId);
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById(tableId);
+            const rows = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let match = false;
+                for (let j = 0; j < cells.length - 1; j++) {
+                    if (cells[j].textContent.toLowerCase().includes(filter)) {
+                        match = true;
+                        break;
+                    }
+                }
+                rows[i].style.display = match ? '' : 'none';
+            }
+        }
+
+        // Chatbot JavaScript
+        function handleMenuOption(option) {
+            const messages = document.getElementById('chatbot-messages');
+
+            // Add user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'chatbot-message user';
+            userMessage.innerHTML = `<p>${option.replace('_', ' ')}</p>`;
+            messages.appendChild(userMessage);
+
+            // Send AJAX request to backend
+            fetch('/patient/chatbot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ option: option })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const botMessage = document.createElement('div');
+                botMessage.className = 'chatbot-message bot';
+                botMessage.innerHTML = `<p>${data.response}</p>`;
+                messages.appendChild(botMessage);
+                messages.scrollTop = messages.scrollHeight;
+            })
+            .catch(error => {
+                const botMessage = document.createElement('div');
+                botMessage.className = 'chatbot-message bot';
+                botMessage.innerHTML = `<p>Error: Could not connect to server.</p>`;
+                messages.appendChild(botMessage);
+                messages.scrollTop = messages.scrollHeight;
+            });
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatbot-input');
+            const message = input.value.trim();
+            if (!message) return;
+
+            const messages = document.getElementById('chatbot-messages');
+
+            // Add user message
+            const userMessage = document.createElement('div');
+            userMessage.className = 'chatbot-message user';
+            userMessage.innerHTML = `<p>${message}</p>`;
+            messages.appendChild(userMessage);
+
+            // Send AJAX request to backend
+            fetch('/patient/chatbot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const botMessage = document.createElement('div');
+                botMessage.className = 'chatbot-message bot';
+                botMessage.innerHTML = `<p>${data.response}</p>`;
+                messages.appendChild(botMessage);
+                messages.scrollTop = messages.scrollHeight;
+            })
+            .catch(error => {
+                const botMessage = document.createElement('div');
+                botMessage.className = 'chatbot-message bot';
+                botMessage.innerHTML = `<p>Error: Could not connect to server.</p>`;
+                messages.appendChild(botMessage);
+                messages.scrollTop = messages.scrollHeight;
+            });
+
+            // Clear input
+            input.value = '';
+        }
+
+        // Show dashboard by default
+        showSection('dashboard');
+    </script>
+</body>
+</html>

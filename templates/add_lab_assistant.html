@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Lab Assistant - Healthcare System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+                <h3>Healthcare System</h3>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="{{ url_for('admin.admin_dashboard') }}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+                <li><a href="{{ url_for('admin.add_doctor') }}"><i class="fas fa-user-md"></i> <span>Add Doctor</span></a></li>
+                <li><a href="{{ url_for('admin.add_patient') }}"><i class="fas fa-user-injured"></i> <span>Add Patient</span></a></li>
+                <li class="active"><a href="{{ url_for('admin.add_lab_assistant') }}"><i class="fas fa-flask"></i> <span>Add Lab Assistant</span></a></li>
+                <li><a href="{{ url_for('admin.view_doctors') }}"><i class="fas fa-stethoscope"></i> <span>View Doctors</span></a></li>
+                <li><a href="{{ url_for('admin.view_patients') }}"><i class="fas fa-users"></i> <span>View Patients</span></a></li>
+                <li><a href="{{ url_for('admin.view_lab_assistants') }}"><i class="fas fa-vials"></i> <span>View Lab Assistants</span></a></li>
+                <li><a href="{{ url_for('auth.profile') }}"><i class="fas fa-user-cog"></i> <span>Profile Settings</span></a></li>
+                <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <i class="fas fa-bars menu-toggle"></i>
+                    <h2><i class="fas fa-flask"></i> Add New Lab Assistant</h2>
+                </div>
+                <div class="header-right">
+                    <div class="user-profile">
+                        <img src="https://via.placeholder.com/40" alt="Profile" class="profile-pic">
+                        <span>{{ session.username }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Form Content -->
+            <div class="form-content">
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-container">
+                            {% for category, message in messages %}
+                                <div class="flash-message {{ category }}">{{ message }} <i class="fas fa-times flash-close"></i></div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Confirmation Section -->
+                {% if lab_assistant_id %}
+                    <div class="confirmation-card">
+                        <div class="card-header">
+                            <h3>Lab Assistant Added Successfully</h3>
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <p>Lab Assistant ID: <strong>{{ lab_assistant_id }}</strong></p>
+                        <p>Please note this ID for login purposes.</p>
+                        <div class="confirmation-actions">
+                            <a href="{{ url_for('admin.add_lab_assistant') }}" class="action-btn"><i class="fas fa-plus"></i> Add Another Lab Assistant</a>
+                            <a href="{{ url_for('admin.admin_dashboard') }}" class="action-btn secondary"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Lab Assistant Form -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <h3>Lab Assistant Registration</h3>
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <form method="POST" action="{{ url_for('admin.add_lab_assistant') }}" class="lab-assistant-form">
+                        <div class="form-section">
+                            <h4>Account Details</h4>
+                            <div class="form-group">
+                                <label for="password"><i class="fas fa-lock"></i> Password</label>
+                                <input type="password" id="password" name="password" required>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h4>Personal Information</h4>
+                            <div class="form-group">
+                                <label for="name"><i class="fas fa-id-badge"></i> Full Name</label>
+                                <input type="text" id="name" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email"><i class="fas fa-envelope"></i> Email ID</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone"><i class="fas fa-phone"></i> Phone Number</label>
+                                <input type="tel" id="phone" name="phone" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="date_of_birth"><i class="fas fa-calendar"></i> Date of Birth</label>
+                                <input type="date" id="date_of_birth" name="date_of_birth" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="gender"><i class="fas fa-venus-mars"></i> Gender</label>
+                                <select id="gender" name="gender" required>
+                                    <option value="" disabled selected>Select gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="blood_group"><i class="fas fa-tint"></i> Blood Group</label>
+                                <select id="blood_group" name="blood_group">
+                                    <option value="" selected>Select blood group</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="address"><i class="fas fa-home"></i> Address</label>
+                                <textarea id="address" name="address"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="emergency_contact"><i class="fas fa-phone-alt"></i> Emergency Contact</label>
+                                <input type="tel" id="emergency_contact" name="emergency_contact">
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h4>Professional Information</h4>
+                            <div class="form-group">
+                                <label for="qualification"><i class="fas fa-graduation-cap"></i> Qualification</label>
+                                <input type="text" id="qualification" name="qualification" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lab_registration_number"><i class="fas fa-id-card"></i> Lab Registration Number</label>
+                                <input type="text" id="lab_registration_number" name="lab_registration_number" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lab_department"><i class="fas fa-flask"></i> Lab Department</label>
+                                <select id="lab_department" name="lab_department" required>
+                                    <option value="" disabled selected>Select lab department</option>
+                                    <option value="Pathology">Pathology</option>
+                                    <option value="Microbiology">Microbiology</option>
+                                    <option value="Biochemistry">Biochemistry</option>
+                                    <option value="Hematology">Hematology</option>
+                                    <option value="Radiology">Radiology</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="action-btn"><i class="fas fa-save"></i> Add Lab Assistant</button>
+                            <a href="{{ url_for('admin.admin_dashboard') }}" class="action-btn secondary"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

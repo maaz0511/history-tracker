@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Assistant Dashboard - Healthcare System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+                <h3>Healthcare System</h3>
+            </div>
+            <nav class="sidebar-menu">
+                <ul>
+                    <li class="{% if default_section == 'dashboard' %}active{% endif %}">
+                        <a href="{{ url_for('lab_assistant.lab_assistant_dashboard', section='dashboard') }}"><i class="fas fa-home"></i> <span>Dashboard</span></a>
+                    </li>
+                    <li class="{% if default_section == 'add-reports' %}active{% endif %}">
+                        <a href="{{ url_for('lab_assistant.lab_assistant_dashboard', section='add-reports') }}"><i class="fas fa-file-upload"></i> <span>Add Reports</span></a>
+                    </li>
+                    <li class="{% if default_section == 'view-reports' %}active{% endif %}">
+                        <a href="{{ url_for('lab_assistant.lab_assistant_dashboard', section='view-reports') }}"><i class="fas fa-file-alt"></i> <span>View Reports</span></a>
+                    </li>
+                    <li class="{% if default_section == 'profile' %}active{% endif %}">
+                        <a href="{{ url_for('lab_assistant.lab_assistant_dashboard', section='profile') }}"><i class="fas fa-user-cog"></i> <span>Profile</span></a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <i class="fas fa-bars menu-toggle"></i>
+                    <h2><i class="fas fa-flask"></i> {{ user_data.name }}</h2>
+                </div>
+                <div class="header-right">
+                    
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <section class="content">
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-container">
+                            {% for category, message in messages %}
+                                <div class="flash-message {{ category }}">{{ message }} <i class="fas fa-times flash-close"></i></div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Dashboard Section -->
+                <div id="dashboard-section" class="content-section {% if default_section == 'dashboard' %}active{% endif %}">
+                    <h1>Dashboard</h1>
+                    <div class="stats-grid">
+                        <!-- Lab Assistant Profile Cards -->
+                        <div class="stat-card">
+                            <h3>Name</h3>
+                            <p><b>{{ user_data.name or 'N/A' }}</b></p>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Lab Department</h3>
+                            <b><p>{{ user_data.lab_department or 'N/A' }}</p></b>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Email</h3>
+                            <b><p>{{ user_data.email or 'N/A' }}</p></b>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Phone</h3>
+                            <b><p>{{ user_data.phone or 'N/A' }}</p></b>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Lab Registration No</h3>
+                            <b><p>{{ user_data.lab_registration_number or 'N/A' }}</p></b>
+                        </div>
+                        <!-- Total Reports Added Card -->
+                        <div class="stat-card">
+                            <h3>Total Reports Added</h3>
+                            <b><p>{{ report_count or '0' }}</p></b>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Report Section -->
+                <div id="add-reports-section" class="content-section {% if default_section == 'add-reports' %}active{% endif %}">
+                    <div class="form-card">
+                        <div class="card-header">
+                            <h3>Add Lab Report</h3>
+                            <i class="fas fa-file-upload"></i>
+                        </div>
+                        <form method="POST" action="{{ url_for('lab_assistant.add_lab_report') }}" enctype="multipart/form-data" class="lab-assistant-form">
+                            <div class="form-section">
+                                <div class="form-group">
+                                    <label for="lab_assistant_name"><i class="fas fa-user"></i> Lab Assistant</label>
+                                    <input type="text" id="lab_assistant_name" name="lab_assistant_name" value="{{ lab_assistant_name }}" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="patient_id"><i class="fas fa-user-injured"></i> Patient ID</label>
+                                    <input type="text" id="patient_id" name="patient_id" required oninput="fetchPatientName(this.value)">
+                                    <span id="patient_name_display" class="form-text"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label for="report_date"><i class="fas fa-calendar"></i> Date</label>
+                                    <input type="date" id="report_date" name="report_date" value="{{ current_date }}" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="report_time"><i class="fas fa-clock"></i> Time</label>
+                                    <input type="time" id="report_time" name="report_time" value="{{ current_time }}" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="report_file"><i class="fas fa-file-pdf"></i> Upload Report (PDF)</label>
+                                    <input type="file" id="report_file" name="report_file" accept="application/pdf" required>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="action-btn"><i class="fas fa-save"></i> Add Report</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- View Lab Reports Section -->
+                <div id="view-reports-section" class="content-section {% if default_section == 'view-reports' %}active{% endif %}">
+                    <div class="table-card">
+                        <div class="card-header">
+                            <h3>Lab Reports</h3>
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="table-actions">
+                            <form class="search-form" method="GET" action="{{ url_for('lab_assistant.lab_assistant_dashboard', section='view-reports') }}">
+                                <div class="search-group">
+                                    <input type="text" name="report_search" placeholder="Search by patient ID or date" value="{{ report_search | safe }}" aria-label="Search lab reports">
+                                    <button type="submit" class="search-btn" aria-label="Search"><i class="fas fa-search"></i></button>
+                                </div>
+                                <input type="hidden" name="report_sort_by" value="{{ report_sort_by }}">
+                                <input type="hidden" name="report_sort_order" value="{{ report_sort_order }}">
+                            </form>
+                        </div>
+                        <div class="table-wrapper">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Patient ID</th>
+                                        <th>Patient Name</th>
+                                        <th>
+                                            <a href="{{ url_for('lab_assistant.lab_assistant_dashboard', report_search=report_search, report_sort_by='report_date', report_sort_order='desc' if report_sort_by == 'report_date' and report_sort_order == 'asc' else 'asc', section='view-reports') }}">
+                                                Date
+                                                {% if report_sort_by == 'report_date' %}
+                                                    <i class="fas fa-sort-{{ 'down' if report_sort_order == 'desc' else 'up' }}"></i>
+                                                {% endif %}
+                                            </a>
+                                        </th>
+                                        <th>Time</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if lab_reports %}
+                                        {% for report in lab_reports %}
+                                            <tr>
+                                                <td>{{ report.patient_id }}</td>
+                                                <td>{{ report.patient_name }}</td>
+                                                <td>{{ report.report_date }}</td>
+                                                <td>{{ report.report_time }}</td>
+                                                <td class="action-cell">
+                                                    {% if report.id is defined and report.id is not none and report.id is number %}
+                                                        <button onclick="viewReport('{{ url_for('lab_assistant.view_lab_report', report_id=report.id | int) }}')" class="table-btn" title="View" aria-label="View report"><i class="fas fa-eye"></i></button>
+                                                    {% else %}
+                                                        <button class="table-btn disabled" disabled title="View unavailable" aria-label="View report unavailable"><i class="fas fa-eye"></i></button>
+                                                    {% endif %}
+                                                    <a href="{{ url_for('lab_assistant.download_lab_report', report_id=report.id) }}" class="table-btn" title="Download" aria-label="Download report"><i class="fas fa-download"></i></a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="5" class="no-data">No lab reports found.</td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Pagination -->
+                        {% if total_report_pages > 1 %}
+                            <nav class="pagination" aria-label="Pagination">
+                                <div class="pagination-group">
+                                    {% if report_page > 1 %}
+                                        <a href="{{ url_for('lab_assistant.lab_assistant_dashboard', report_search=report_search, report_sort_by=report_sort_by, report_sort_order=report_sort_order, report_page=report_page-1, section='view-reports') }}" class="pagination-btn" aria-label="Previous page"><i class="fas fa-chevron-left"></i> Previous</a>
+                                    {% endif %}
+                                    <span>Page {{ report_page }} of {{ total_report_pages }}</span>
+                                    {% if report_page < total_report_pages %}
+                                        <a href="{{ url_for('lab_assistant.lab_assistant_dashboard', report_search=report_search, report_sort_by=report_sort_by, report_sort_order=report_sort_order, report_page=report_page+1, section='view-reports') }}" class="pagination-btn" aria-label="Next page">Next <i class="fas fa-chevron-right"></i></a>
+                                    {% endif %}
+                                </div>
+                            </nav>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Profile Section -->
+                <div id="profile-section" class="content-section {% if default_section == 'profile' %}active{% endif %}">
+                    <!-- Profile Overview -->
+                    <div class="profile-card">
+                        <div class="card-header">
+                            <h3>Profile Overview</h3>
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="profile-grid">
+                            <div class="profile-item">
+                                <span class="label">Username:</span>
+                                <span class="value">{{ session.username }}</span>
+                            </div>
+                            <div class="profile-item">
+                                <span class="label">Role:</span>
+                                <span class="value capitalize">{{ session.role }}</span>
+                            </div>
+                            {% if user_data.name %}
+                                <div class="profile-item">
+                                    <span class="label">Name:</span>
+                                    <span class="value">{{ user_data.name }}</span>
+                                </div>
+                            {% endif %}
+                            {% if user_data.lab_department %}
+                                <div class="profile-item">
+                                    <span class="label">Lab Department:</span>
+                                    <span class="value">{{ user_data.lab_department }}</span>
+                                </div>
+                            {% endif %}
+                            {% if user_data.phone %}
+                                <div class="profile-item">
+                                    <span class="label">Phone:</span>
+                                    <span class="value">{{ user_data.phone }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Edit Profile -->
+                    <div class="form-card">
+                        <div class="card-header">
+                            <h3>Edit Profile</h3>
+                            <i class="fas fa-user-edit"></i>
+                        </div>
+                        <form method="POST" action="{{ url_for('lab_assistant.lab_assistant_dashboard', section='profile') }}" class="lab-assistant-form">
+                            <input type="hidden" name="update_profile" value="true">
+                            <div class="form-section">
+                                <h4>Personal Information</h4>
+                                <div class="form-group">
+                                    <label for="name"><i class="fas fa-id-badge"></i> Full Name</label>
+                                    <input type="text" id="name" name="name" value="{{ user_data.name or '' }}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="email"><i class="fas fa-envelope"></i> Email</label>
+                                    <input type="email" id="email" name="email" value="{{ user_data.email or '' }}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="phone"><i class="fas fa-phone"></i> Phone</label>
+                                    <input type="tel" id="phone" name="phone" value="{{ user_data.phone or '' }}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="date_of_birth"><i class="fas fa-calendar"></i> Date of Birth</label>
+                                    <input type="date" id="date_of_birth" name="date_of_birth" value="{{ user_data.date_of_birth or '' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="gender"><i class="fas fa-venus-mars"></i> Gender</label>
+                                    <select id="gender" name="gender">
+                                        <option value="" {% if not user_data.gender %}selected{% endif %}>Select</option>
+                                        <option value="Male" {% if user_data.gender == 'Male' %}selected{% endif %}>Male</option>
+                                        <option value="Female" {% if user_data.gender == 'Female' %}selected{% endif %}>Female</option>
+                                        <option value="Other" {% if user_data.gender == 'Other' %}selected{% endif %}>Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="blood_group"><i class="fas fa-tint"></i> Blood Group</label>
+                                    <select id="blood_group" name="blood_group">
+                                        <option value="" {% if not user_data.blood_group %}selected{% endif %}>Select</option>
+                                        <option value="A+" {% if user_data.blood_group == 'A+' %}selected{% endif %}>A+</option>
+                                        <option value="A-" {% if user_data.blood_group == 'A-' %}selected{% endif %}>A-</option>
+                                        <option value="B+" {% if user_data.blood_group == 'B+' %}selected{% endif %}>B+</option>
+                                        <option value="B-" {% if user_data.blood_group == 'B-' %}selected{% endif %}>B-</option>
+                                        <option value="AB+" {% if user_data.blood_group == 'AB+' %}selected{% endif %}>AB+</option>
+                                        <option value="AB-" {% if user_data.blood_group == 'AB-' %}selected{% endif %}>AB-</option>
+                                        <option value="O+" {% if user_data.blood_group == 'O+' %}selected{% endif %}>O+</option>
+                                        <option value="O-" {% if user_data.blood_group == 'O-' %}selected{% endif %}>O-</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="address"><i class="fas fa-home"></i> Address</label>
+                                    <textarea id="address" name="address">{{ user_data.address or '' }}</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="emergency_contact"><i class="fas fa-phone-alt"></i> Emergency Contact</label>
+                                    <input type="tel" id="emergency_contact" name="emergency_contact" value="{{ user_data.emergency_contact or '' }}">
+                                </div>
+                            </div>
+                            <div class="form-section">
+                                <h4>Professional Information</h4>
+                                <div class="form-group">
+                                    <label for="qualification"><i class="fas fa-graduation-cap"></i> Qualification</label>
+                                    <input type="text" id="qualification" name="qualification" value="{{ user_data.qualification or '' }}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="lab_registration_number"><i class="fas fa-id-card"></i> Lab Registration Number</label>
+                                    <input type="text" id="lab_registration_number" name="lab_registration_number" value="{{ user_data.lab_registration_number or 'N/A' }}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="lab_department"><i class="fas fa-flask"></i> Lab Department</label>
+                                    <select id="lab_department" name="lab_department" required>
+                                        <option value="" {% if not user_data.lab_department %}selected{% endif %}>Select</option>
+                                        <option value="Pathology" {% if user_data.lab_department == 'Pathology' %}selected{% endif %}>Pathology</option>
+                                        <option value="Microbiology" {% if user_data.lab_department == 'Microbiology' %}selected{% endif %}>Microbiology</option>
+                                        <option value="Biochemistry" {% if user_data.lab_department == 'Biochemistry' %}selected{% endif %}>Biochemistry</option>
+                                        <option value="Hematology" {% if user_data.lab_department == 'Hematology' %}selected{% endif %}>Hematology</option>
+                                        <option value="Radiology" {% if user_data.lab_department == 'Radiology' %}selected{% endif %}>Radiology</option>
+                                        <option value="Other" {% if user_data.lab_department == 'Other' %}selected{% endif %}>Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="action-btn"><i class="fas fa-save"></i> Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Change Password -->
+                    <div class="form-card">
+                        <div class="card-header">
+                            <h3>Change Password</h3>
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <form method="POST" action="{{ url_for('lab_assistant.lab_assistant_dashboard', section='profile') }}" class="password-form">
+                            <input type="hidden" name="change_password" value="true">
+                            <div class="form-section">
+                                <div class="form-group">
+                                    <label for="current_password"><i class="fas fa-lock"></i> Current Password</label>
+                                    <input type="password" id="current_password" name="current_password" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="new_password"><i class="fas fa-key"></i> New Password</label>
+                                    <input type="password" id="new_password" name="new_password" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirm_password"><i class="fas fa-key"></i> Confirm New Password</label>
+                                    <input type="password" id="confirm_password" name="confirm_password" required>
+                                </div>
+                                <div class="form-actions">
+                                    <button type="submit" class="action-btn"><i class="fas fa-key"></i> Change Password</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="table-card">
+                        <div class="card-header">
+                            <h3>Recent Activity</h3>
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <div class="table-wrapper">
+                            {% if activity_logs %}
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Action</th>
+                                            <th>Timestamp</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for log in activity_logs %}
+                                            <tr>
+                                                <td>{{ log[0] }}</td>
+                                                <td>{{ log[1] }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% else %}
+                                <p class="no-data">No activity logs available.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for Viewing Reports -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">×</span>
+            <iframe id="reportIframe" src=""></iframe>
+        </div>
+    </div>
+
+    <script>
+        // Toggle content section
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const allSections = document.querySelectorAll('.content-section');
+
+            // Hide all sections
+            allSections.forEach(s => {
+                s.classList.remove('active');
+            });
+
+            // Show the selected section
+            section.classList.add('active');
+        }
+
+        // Fetch patient name based on patient ID
+        function fetchPatientName(patientId) {
+            if (patientId.length >= 3) {
+                fetch('{{ url_for("lab_assistant.fetch_patient_name") }}?patient_id=' + patientId)
+                    .then(response => response.json())
+                    .then(data => {
+                        const patientNameDisplay = document.getElementById('patient_name_display');
+                        if (data.patient_name) {
+                            patientNameDisplay.textContent = 'Patient Name: ' + data.patient_name;
+                            patientNameDisplay.style.color = 'green';
+                        } else {
+                            patientNameDisplay.textContent = 'Patient not found';
+                            patientNameDisplay.style.color = 'red';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching patient name:', error);
+                        document.getElementById('patient_name_display').textContent = 'Error fetching patient';
+                    });
+            } else {
+                document.getElementById('patient_name_display').textContent = '';
+            }
+        }
+
+        // View report in modal
+        function viewReport(url) {
+            const modal = document.getElementById('reportModal');
+            const iframe = document.getElementById('reportIframe');
+            iframe.src = url;
+            modal.style.display = 'flex';
+        }
+
+        // Close modal
+        function closeModal() {
+            const modal = document.getElementById('reportModal');
+            const iframe = document.getElementById('reportIframe');
+            modal.style.display = 'none';
+            iframe.src = '';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('reportModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+
+        // Dismiss flash messages
+        document.querySelectorAll('.flash-close').forEach(button => {
+            button.addEventListener('click', () => {
+                button.parentElement.remove();
+            });
+        });
+
+        // Open the default section based on URL parameter
+        document.addEventListener('DOMContentLoaded', () => {
+            const section = '{{ default_section }}';
+            toggleSection(section + '-section');
+        });
+    </script>
+</body>
+</html>

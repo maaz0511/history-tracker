@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Prescriptions - Healthcare System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+                <h3>Healthcare Doctor</h3>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="{{ url_for('doctor.doctor_dashboard') }}"><i class="fas fa-home" aria-label="Dashboard"></i> Dashboard</a></li>
+                <li><a href="{{ url_for('doctor.view_patients') }}"><i class="fas fa-users" aria-label="View Patients"></i> View Patients</a></li>
+                <li><a href="{{ url_for('doctor.view_reports') }}"><i class="fas fa-file-medical" aria-label="View Reports"></i> View Reports</a></li>
+                <li><a href="{{ url_for('doctor.disease_prediction') }}"><i class="fas fa-diagnoses" aria-label="Disease Prediction"></i> Disease Prediction</a></li>
+                <li class="active"><a href="{{ url_for('doctor.digital_prescriptions') }}"><i class="fas fa-prescription" aria-label="Digital Prescriptions"></i> Digital Prescriptions</a></li>
+                <li><a href="{{ url_for('auth.profile') }}"><i class="fas fa-user-cog" aria-label="Profile Settings"></i> Profile Settings</a></li>
+                <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt" aria-label="Logout"></i> Logout</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <i class="fas fa-bars menu-toggle" aria-label="Toggle Menu"></i>
+                    <h2>Digital Prescriptions</h2>
+                </div>
+                <div class="header-right">
+                    <div class="user-profile">
+                        <img src="https://via.placeholder.com/40" alt="Profile Picture" class="profile-pic">
+                        <span>{{ session.username }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Form Content -->
+            <div class="form-content">
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-container">
+                            {% for category, message in messages %}
+                                <div class="flash-message {{ category }}">{{ message }} <i class="fas fa-times flash-close" aria-label="Close Flash Message"></i></div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Prescription Form -->
+                <div class="form-card">
+                    <div class="card-header">
+                        <h3>Issue Prescription</h3>
+                        <i class="fas fa-prescription" aria-label="Prescription Icon"></i>
+                    </div>
+                    <form method="POST" action="{{ url_for('doctor.digital_prescriptions') }}" class="prescription-form">
+                        <div class="form-section">
+                            <h4>Patient Information</h4>
+                            <div class="form-group">
+                                <label for="patient_id"><i class="fas fa-user" aria-label="Patient ID Icon"></i> Patient ID <span class="required-asterisk">*</span></label>
+                                <input type="text" id="patient_id" name="patient_id" class="required" required aria-describedby="patient-id-error">
+                                <span id="patient-id-error" class="error-message"></span>
+                            </div>
+                            <div class="form-group">
+                                <label for="prescription_date"><i class="fas fa-calendar" aria-label="Date Icon"></i> Date</label>
+                                <input type="text" id="prescription_date" name="prescription_date" value="{{ current_date }}" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="prescription_time"><i class="fas fa-clock" aria-label="Time Icon"></i> Time</label>
+                                <input type="text" id="prescription_time" name="prescription_time" value="{{ current_time }}" readonly>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <h4>Prescription Details</h4>
+                            <div class="form-group">
+                                <label for="notes"><i class="fas fa-sticky-note" aria-label="Notes Icon"></i> Notes</label>
+                                <textarea id="notes" name="notes"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="medicines"><i class="fas fa-pills" aria-label="Medicines Icon"></i> Medicines</label>
+                                <textarea id="medicines" name="medicines"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="action-btn"><i class="fas fa-save" aria-label="Save Icon"></i> Issue Prescription</button>
+                            <a href="{{ url_for('doctor.doctor_dashboard') }}" class="action-btn secondary"><i class="fas fa-arrow-left" aria-label="Back Icon"></i> Back to Dashboard</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        // Flash message dismissal
+        document.querySelectorAll('.flash-close').forEach(button => {
+            button.addEventListener('click', () => {
+                button.parentElement.remove();
+            });
+        });
+    </script>
+</body>
+</html>

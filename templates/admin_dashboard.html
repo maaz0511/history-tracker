@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Healthcare System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" class="logo">
+                <h3>Healthcare Admin</h3>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="active"><a href="{{ url_for('admin.admin_dashboard') }}"><i class="fas fa-home"></i> Dashboard</a></li>
+                <li><a href="{{ url_for('admin.add_doctor') }}"><i class="fas fa-user-md"></i> Add Doctor</a></li>
+                <li><a href="{{ url_for('admin.add_patient') }}"><i class="fas fa-user-injured"></i> Add Patient</a></li>
+                <li><a href="{{ url_for('admin.add_lab_assistant') }}"><i class="fas fa-flask"></i> Add Lab Assistant</a></li>
+                <li><a href="{{ url_for('admin.view_doctors') }}"><i class="fas fa-stethoscope"></i> View Doctors</a></li>
+                <li><a href="{{ url_for('admin.view_patients') }}"><i class="fas fa-users"></i> View Patients</a></li>
+                <li><a href="{{ url_for('admin.view_lab_assistants') }}"><i class="fas fa-vials"></i> View Lab Assistants</a></li>
+                <li><a href="{{ url_for('auth.profile') }}"><i class="fas fa-user-cog"></i> Profile Settings</a></li>
+                <li><a href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <i class="fas fa-bars menu-toggle"></i>
+                    <h2>Admin Dashboard</h2>
+                </div>
+                <div class="header-right">
+                    <div class="user-profile">
+                        <img src="https://via.placeholder.com/40" alt="Profile" class="profile-pic">
+                        <span>Welcome, {{ session.username }}</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-content">
+                <!-- Statistics Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-user-md"></i>
+                        <h3>Doctors</h3>
+                        <p class="stat-number" id="doctor-count">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-user-injured"></i>
+                        <h3>Patients</h3>
+                        <p class="stat-number" id="patient-count">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-flask"></i>
+                        <h3>Lab Assistants</h3>
+                        <p class="stat-number" id="lab-assistant-count">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-calendar-check"></i>
+                        <h3>Appointments</h3>
+                        <p class="stat-number">0</p>
+                    </div>
+                </div>
+
+                <!-- Recent Activities -->
+                <div class="recent-activities">
+                    <h3>Recent Activities</h3>
+                    <ul class="activity-list">
+                        {% if activities %}
+                            {% for activity in activities %}
+                                <li>
+                                    <i class="fas {{ 'fa-plus-circle' if 'Added' in activity.action else 'fa-trash' if 'Deleted' in activity.action else 'fa-edit' }}"></i>
+                                    {{ activity.action }} <span class="activity-time">({{ activity.timestamp }})</span>
+                                </li>
+                            {% endfor %}
+                        {% else %}
+                            <li class="no-activity">No recent activities.</li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h3>Quick Actions</h3>
+                    <div class="action-buttons">
+                        <a href="{{ url_for('admin.add_doctor') }}" class="action-btn"><i class="fas fa-user-md"></i> Add Doctor</a>
+                        <a href="{{ url_for('admin.add_patient') }}" class="action-btn"><i class="fas fa-user-injured"></i> Add Patient</a>
+                        <a href="{{ url_for('admin.add_lab_assistant') }}" class="action-btn"><i class="fas fa-flask"></i> Add Lab Assistant</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
